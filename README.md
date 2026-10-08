@@ -115,7 +115,8 @@ Tools that only some VMs need live in `extras/`, one script each. The
 bootstrap does not run them. Run the ones a VM needs by hand, after the
 bootstrap:
 
-    ~/dotfiles/extras/heroku.sh
+    ~/dotfiles/extras/heroku.sh      # Heroku CLI
+    ~/dotfiles/extras/postgres.sh    # PostgreSQL server and a database role for you
 
 Each is safe to re-run. To add one, copy an existing script. Run a VM's
 extras before taking its snapshot.
