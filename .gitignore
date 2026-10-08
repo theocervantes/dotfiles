@@ -1,0 +1,19 @@
+# Secrets. None of these belong in a public repo, ever.
+.env*
+*.pem
+*.key
+id_*
+secrets
+secrets/
+*.secret
+
+# Backups made by bootstrap-dev-vm.sh
+*.bak.*
+
+# Editor and OS junk
+*.swp
+*.swo
+*~
+.DS_Store
+.idea/
+.vscode/
