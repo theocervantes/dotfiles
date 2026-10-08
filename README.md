@@ -51,15 +51,16 @@ If `create-vm.sh` made the VM, the repo is already there:
 
 From a clone you made yourself:
 
-    git clone https://github.com/<MY_USER>/dotfiles ~/dotfiles
+    git clone https://github.com/theocervantes/dotfiles ~/dotfiles
     ~/dotfiles/bootstrap-dev-vm.sh
 
 Or as a one-liner, which clones the repo to `~/dotfiles` first:
 
-    curl -fsSL https://raw.githubusercontent.com/<MY_USER>/dotfiles/main/bootstrap-dev-vm.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/theocervantes/dotfiles/main/bootstrap-dev-vm.sh | bash
 
 The script installs apt packages, the GitHub CLI, mise (Ruby, Node, Python,
-Neovim, lazygit), Claude Code, and herdr. It then:
+Neovim, lazygit), Claude Code, and herdr with its Claude Code integration. It
+then:
 
 - adds `config/gitconfig` as an include in `~/.gitconfig`;
 - symlinks `config/nvim` to `~/.config/nvim`;
@@ -96,3 +97,25 @@ belongs to that VM.
        incus snapshot create NAME clean-bootstrap
 
    To go back to it later: `incus snapshot restore NAME clean-bootstrap`.
+   To replace it with a newer one, add `--reuse` to the create command.
+
+## Attaching herdr from the host (optional)
+
+`herdr --remote` reaches the VM over SSH, so the host needs a key in the VM
+and an address that does not change. Run these on the host, with the VM
+running. `VM_IP` is the address `incus list` shows for it.
+
+1. Put a host public key in the VM. Only the public key goes in; do not use
+   SSH agent forwarding, which would let the VM use the host's keys.
+
+       incus exec NAME -- su - USER -c 'mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys' < ~/.ssh/id_ed25519.pub
+
+2. Pin the VM's address so it survives restarts:
+
+       incus config device override NAME eth0 ipv4.address=VM_IP
+
+3. Attach:
+
+       herdr --remote USER@VM_IP
+
+Detach with `Ctrl+b` then `q`. The session keeps running in the VM.

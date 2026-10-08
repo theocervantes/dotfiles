@@ -6,10 +6,10 @@
 #   ~/dotfiles/bootstrap-dev-vm.sh
 #
 # Without a clone (it clones the repo to ~/dotfiles first):
-#   curl -fsSL https://raw.githubusercontent.com/<MY_USER>/dotfiles/main/bootstrap-dev-vm.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/theocervantes/dotfiles/main/bootstrap-dev-vm.sh | bash
 
 # GitHub account that hosts this repo. Only used when the script has to clone.
-GITHUB_USER="<MY_USER>"
+GITHUB_USER="theocervantes"
 
 # Edit these to taste. Projects should still pin their own versions in mise.toml.
 RUBY_VERSION="latest"
@@ -34,9 +34,6 @@ find_dotfiles() {
     DOTFILES_DIR="$HOME/dotfiles"
   elif [[ -e "$HOME/dotfiles" ]]; then
     echo "$HOME/dotfiles exists but is not this repo. Move it away and re-run." >&2
-    exit 1
-  elif [[ "$GITHUB_USER" == "<MY_USER>" ]]; then
-    echo "GITHUB_USER is not set at the top of this script, so the repo cannot be cloned." >&2
     exit 1
   else
     git clone "https://github.com/${GITHUB_USER}/dotfiles" "$HOME/dotfiles"
@@ -136,6 +133,9 @@ main() {
   if ! command -v herdr >/dev/null; then
     curl -fsSL https://herdr.dev/install.sh | sh
   fi
+  # Lets herdr see whether Claude Code is working, waiting, or idle.
+  # Re-running rewrites the same hook and leaves settings.json unchanged.
+  herdr integration install claude
 
   # -------------------------------------------------------------------------
   log "Git defaults (included from the repo; name and email stay in ~/.gitconfig)"
@@ -165,6 +165,9 @@ main() {
   done
 
   cat <<'EOF'
+
+Open a new shell first (exit and come back in) so claude, mise, and the
+runtimes are on your PATH.
 
 Manual steps left (they need you, not a script):
   1. git config --global user.name  "Your Name"
