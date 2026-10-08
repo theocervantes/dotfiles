@@ -69,8 +69,9 @@ Or as a one-liner, which clones the repo to `~/dotfiles` first:
     curl -fsSL https://raw.githubusercontent.com/theocervantes/dotfiles/main/bootstrap-dev-vm.sh | bash
 
 The script installs apt packages, the GitHub CLI, mise (Ruby, Node, Python,
-Neovim, lazygit), Claude Code, herdr with its Claude Code integration, and the
-Playwright CLI with Google Chrome. It then:
+Neovim, lazygit), Claude Code, herdr with its Claude Code integration, the
+Playwright CLI with Google Chrome, and Tailscale (installed, not joined). It
+then:
 
 - adds `config/gitconfig` as an include in `~/.gitconfig`;
 - symlinks `config/nvim` to `~/.config/nvim`;
@@ -148,13 +149,74 @@ belongs to that VM.
 
        claude
 
-5. On the host, stop the VM and snapshot it:
+5. Optional: join your tailnet so you can reach the VM from your phone. See
+   [Tailscale](#tailscale-optional) below.
+
+6. On the host, stop the VM and snapshot it:
 
        incus stop NAME
        incus snapshot create NAME clean-bootstrap
 
    To go back to it later: `incus snapshot restore NAME clean-bootstrap`.
    To replace it with a newer one, add `--reuse` to the create command.
+
+## Tailscale (optional)
+
+Tailscale runs inside each VM, not on the host. Your phone connects straight
+to whichever VM is running, and the host never joins the tailnet.
+
+### 1. Lock the VMs down in the tailnet policy (once)
+
+By default every device on a tailnet can reach every other, which would let
+one VM reach the other. Tagging the VMs fixes that: a tagged device can only
+do what a rule allows, and no rule here lets it start a connection.
+
+In the Tailscale admin console, under Access controls, set:
+
+    {
+      "tagOwners": {
+        "tag:devvm": ["autogroup:member"]
+      },
+      "acls": [
+        // Your own devices can reach each other and the dev VMs.
+        // Nothing lists tag:devvm as a source, so the VMs cannot reach out.
+        {
+          "action": "accept",
+          "src": ["autogroup:member"],
+          "dst": ["autogroup:self:*", "tag:devvm:*"]
+        }
+      ],
+      "ssh": [
+        // Tailscale SSH from your devices into the VMs, as a normal user.
+        {
+          "action": "accept",
+          "src": ["autogroup:member"],
+          "dst": ["tag:devvm"],
+          "users": ["autogroup:nonroot"]
+        }
+      ]
+    }
+
+If you already have a policy, merge these in rather than replacing it.
+
+### 2. Join from inside each VM
+
+    sudo tailscale up --ssh --advertise-tags=tag:devvm
+
+It prints a login URL. Open it in a browser on the host and approve the
+device. `--ssh` turns on Tailscale SSH, so the phone needs no SSH key.
+
+### 3. Connect from the phone
+
+With Tailscale on, use any SSH app and connect to `USER@NAME` (the VM's
+hostname). Then run `herdr` to pick up the session.
+
+### Notes
+
+- The VM must be running, and the host must be on, for the phone to reach it.
+- Joining stores a device key inside the VM. Take the `clean-bootstrap`
+  snapshot after joining, or restoring it will mean joining again.
+- To remove a VM from the tailnet: `sudo tailscale logout` inside it.
 
 ## Shutting down for the day (on the host)
 

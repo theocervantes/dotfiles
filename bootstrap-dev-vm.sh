@@ -150,6 +150,12 @@ main() {
   playwright-cli install --skills --global
 
   # -------------------------------------------------------------------------
+  log "Tailscale (installed only; joining a tailnet is a manual step)"
+  if ! command -v tailscale >/dev/null; then
+    curl -fsSL https://tailscale.com/install.sh | sh
+  fi
+
+  # -------------------------------------------------------------------------
   log "Git defaults (included from the repo; name and email stay in ~/.gitconfig)"
   if git config --global --get-all include.path | grep -Fxq "$DOTFILES_DIR/config/gitconfig"; then
     echo "  ok      ~/.gitconfig already includes $DOTFILES_DIR/config/gitconfig"
@@ -165,7 +171,7 @@ main() {
 
   # -------------------------------------------------------------------------
   log "Done. Versions:"
-  for cmd in git gh mise ruby bundle node python nvim lazygit rg fd fzf jq delta claude herdr playwright-cli; do
+  for cmd in git gh mise ruby bundle node python nvim lazygit rg fd fzf jq delta claude herdr playwright-cli tailscale; do
     printf '  %-14s ' "$cmd"
     if command -v "$cmd" >/dev/null; then
       "$cmd" --version 2>/dev/null | head -n1 || echo "installed"
@@ -185,7 +191,8 @@ Manual steps left (they need you, not a script):
   2. ssh-keygen -t ed25519 -C "<vm-name>"               # key that lives ONLY on this VM
   3. gh auth login                                      # the GitHub account for this VM; upload the key when asked
   4. claude                                             # log in with the Claude account for this VM
-  5. On the host: stop the VM and take a snapshot named "clean-bootstrap".
+  5. sudo tailscale up --ssh                            # optional: reach this VM from your phone (see README first)
+  6. On the host: stop the VM and take a snapshot named "clean-bootstrap".
 EOF
 }
 
