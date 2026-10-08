@@ -16,8 +16,16 @@ there.
     extras/               optional installers, run by hand INSIDE a VM
     config/
       gitconfig           shared git defaults, no name or email
-      nvim/               Neovim config
+      nvim/               Neovim config (LazyVim)
       claude/CLAUDE.md    global coding standards for Claude Code
+
+## Host setup (once)
+
+The host needs Incus with VM support and nothing else from this repo:
+
+1. Install Incus from your distribution's packages.
+2. Add yourself to the `incus-admin` group, then log out and back in.
+3. Run `incus admin init --minimal`.
 
 ## Creating a VM (on the host)
 
@@ -70,6 +78,35 @@ Playwright CLI with Google Chrome. It then:
 Anything already at those paths is moved to `<path>.bak.<timestamp>` first.
 The script is safe to re-run.
 
+When it finishes, leave the VM shell and open a new one. The tools it
+installed are not on your `PATH` until you do.
+
+### Updating a VM later
+
+The copy `create-vm.sh` leaves in the VM has no git history, so it cannot
+pull. Replace it with a clone once; the symlinks keep working because the
+path is the same:
+
+    rm -rf ~/dotfiles && git clone https://github.com/theocervantes/dotfiles ~/dotfiles
+
+After that, `git -C ~/dotfiles pull` and re-run the bootstrap.
+
+## Neovim
+
+`config/nvim` is a [LazyVim](https://www.lazyvim.org/) setup with two
+additions. The first launch of `nvim` installs the plugins.
+
+- [vim-vertigo](https://github.com/prendradjaja/vim-vertigo) jumps by relative
+  line number, typed on the Colemak-DH home row (`arstgmneio` for
+  `1234567890`). `<Space>e` jumps down and `<Space>n` jumps up. These replace
+  LazyVim's file explorer and notification history on the same keys; the
+  explorer is still on `<Space>E`.
+- `kk` leaves insert and visual mode.
+
+`lazy-lock.json` pins the plugin versions. Updating plugins inside a VM
+rewrites it in that VM's clone, so commit it from there or discard the change
+before the next pull.
+
 ## Extras
 
 Tools that only some VMs need live in `extras/`, one script each. The
@@ -78,7 +115,8 @@ bootstrap:
 
     ~/dotfiles/extras/heroku.sh
 
-Each is safe to re-run. To add one, copy an existing script.
+Each is safe to re-run. To add one, copy an existing script. Run a VM's
+extras before taking its snapshot.
 
 Where things go:
 
@@ -132,8 +170,15 @@ running. `VM_IP` is the address `incus list` shows for it.
 
        incus config device override NAME eth0 ipv4.address=VM_IP
 
-3. Attach:
+3. Give the VM a short name in the host's `~/.ssh/config`:
 
-       herdr --remote USER@VM_IP
+       Host NAME-vm
+           HostName VM_IP
+           User USER
+           ForwardAgent no
+
+4. Attach:
+
+       herdr --remote NAME-vm
 
 Detach with `Ctrl+b` then `q`. The session keeps running in the VM.
