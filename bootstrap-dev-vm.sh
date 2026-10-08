@@ -120,6 +120,8 @@ main() {
   log "Runtimes and tools via mise (precompiled Ruby, falls back to source if none exists)"
   # Precompiled Ruby is mise's default since 2026.8.0; set explicitly so older mise versions match.
   mise settings set ruby.compile false
+  # Rails projects pin Ruby in .ruby-version; mise ignores that file unless told to read it.
+  mise settings add idiomatic_version_file_enable_tools ruby
   mise use -g "ruby@${RUBY_VERSION}" "node@${NODE_VERSION}" "python@${PYTHON_VERSION}"
   mise use -g neovim@latest lazygit@latest
   # mise is only activated in new shells, so find its tools through the shims here.
