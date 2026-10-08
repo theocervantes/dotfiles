@@ -13,6 +13,7 @@ there.
 
     bootstrap-dev-vm.sh   runs INSIDE a VM, as a normal user
     create-vm.sh          runs on the HOST
+    snapshot-vms.sh       runs on the HOST
     extras/               optional installers, run by hand INSIDE a VM
     config/
       gitconfig           shared git defaults, no name or email
@@ -154,6 +155,18 @@ belongs to that VM.
 
    To go back to it later: `incus snapshot restore NAME clean-bootstrap`.
    To replace it with a newer one, add `--reuse` to the create command.
+
+## Shutting down for the day (on the host)
+
+    ./snapshot-vms.sh
+
+This stops every Incus instance that is running and takes a snapshot of each,
+named `stopped-<date>-<time>`. Incus deletes those on its own after 14 days
+(`KEEP_FOR` at the top of the script). `clean-bootstrap` is never touched.
+
+An alias in the host's `~/.bashrc` makes it one word:
+
+    alias vms-down="$HOME/path/to/dotfiles/snapshot-vms.sh"
 
 ## Attaching herdr from the host (optional)
 
