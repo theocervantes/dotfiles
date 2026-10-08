@@ -59,8 +59,8 @@ Or as a one-liner, which clones the repo to `~/dotfiles` first:
     curl -fsSL https://raw.githubusercontent.com/theocervantes/dotfiles/main/bootstrap-dev-vm.sh | bash
 
 The script installs apt packages, the GitHub CLI, mise (Ruby, Node, Python,
-Neovim, lazygit), Claude Code, and herdr with its Claude Code integration. It
-then:
+Neovim, lazygit), Claude Code, herdr with its Claude Code integration, and the
+Playwright CLI with Google Chrome. It then:
 
 - adds `config/gitconfig` as an include in `~/.gitconfig`;
 - symlinks `config/nvim` to `~/.config/nvim`;

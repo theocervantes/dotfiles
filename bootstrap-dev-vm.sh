@@ -122,6 +122,8 @@ main() {
   mise settings set ruby.compile false
   mise use -g "ruby@${RUBY_VERSION}" "node@${NODE_VERSION}" "python@${PYTHON_VERSION}"
   mise use -g neovim@latest lazygit@latest
+  # mise is only activated in new shells, so find its tools through the shims here.
+  export PATH="$HOME/.local/share/mise/shims:$PATH"
 
   # -------------------------------------------------------------------------
   log "Claude Code (native installer, auto-updates)"
@@ -136,6 +138,16 @@ main() {
   # Lets herdr see whether Claude Code is working, waiting, or idle.
   # Re-running rewrites the same hook and leaves settings.json unchanged.
   herdr integration install claude
+
+  # -------------------------------------------------------------------------
+  log "Playwright CLI (browser automation for coding agents)"
+  mise use -g npm:@playwright/cli@latest
+  # It drives Google Chrome by default; this installs the system package with sudo.
+  if [[ ! -x /opt/google/chrome/chrome ]]; then
+    playwright-cli install-browser chrome
+  fi
+  # Adds the skill to ~/.claude/skills so Claude Code knows how to use it.
+  playwright-cli install --skills --global
 
   # -------------------------------------------------------------------------
   log "Git defaults (included from the repo; name and email stay in ~/.gitconfig)"
@@ -153,10 +165,8 @@ main() {
 
   # -------------------------------------------------------------------------
   log "Done. Versions:"
-  # mise is only activated in new shells, so find its tools through the shims here.
-  export PATH="$HOME/.local/share/mise/shims:$PATH"
-  for cmd in git gh mise ruby bundle node python nvim lazygit rg fd fzf jq delta claude herdr; do
-    printf '  %-8s ' "$cmd"
+  for cmd in git gh mise ruby bundle node python nvim lazygit rg fd fzf jq delta claude herdr playwright-cli; do
+    printf '  %-14s ' "$cmd"
     if command -v "$cmd" >/dev/null; then
       "$cmd" --version 2>/dev/null | head -n1 || echo "installed"
     else
