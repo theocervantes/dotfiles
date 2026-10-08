@@ -13,6 +13,7 @@ there.
 
     bootstrap-dev-vm.sh   runs INSIDE a VM, as a normal user
     create-vm.sh          runs on the HOST
+    extras/               optional installers, run by hand INSIDE a VM
     config/
       gitconfig           shared git defaults, no name or email
       nvim/               Neovim config
@@ -68,6 +69,23 @@ Playwright CLI with Google Chrome. It then:
 
 Anything already at those paths is moved to `<path>.bak.<timestamp>` first.
 The script is safe to re-run.
+
+## Extras
+
+Tools that only some VMs need live in `extras/`, one script each. The
+bootstrap does not run them. Run the ones a VM needs by hand, after the
+bootstrap:
+
+    ~/dotfiles/extras/heroku.sh
+
+Each is safe to re-run. To add one, copy an existing script.
+
+Where things go:
+
+- every VM needs it: `bootstrap-dev-vm.sh`;
+- a generic tool only some VMs need: `extras/`;
+- anything that names or describes a client or contract: not in this repo.
+  It stays inside that VM, or in the project's own repo.
 
 ## Manual steps
 
