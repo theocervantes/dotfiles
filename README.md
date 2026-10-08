@@ -20,7 +20,7 @@ there.
 
 ## Creating a VM (on the host)
 
-    ./create-vm.sh NAME [--cpu 4] [--memory 8GiB] [--disk 60GiB] [--user NAME]
+    ./create-vm.sh NAME [--cpu 4] [--memory 4GiB] [--disk 60GiB] [--user NAME]
 
 This launches `images:ubuntu/24.04` as a VM with those limits, waits for it to
 come up, creates the user with passwordless sudo, and copies the last commit

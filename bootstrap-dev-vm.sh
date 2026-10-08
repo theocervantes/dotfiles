@@ -153,6 +153,8 @@ main() {
 
   # -------------------------------------------------------------------------
   log "Done. Versions:"
+  # mise is only activated in new shells, so find its tools through the shims here.
+  export PATH="$HOME/.local/share/mise/shims:$PATH"
   for cmd in git gh mise ruby bundle node python nvim lazygit rg fd fzf jq delta claude herdr; do
     printf '  %-8s ' "$cmd"
     if command -v "$cmd" >/dev/null; then

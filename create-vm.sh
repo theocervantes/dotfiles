@@ -9,7 +9,7 @@
 set -euo pipefail
 
 CPU=4
-MEMORY=8GiB
+MEMORY=4GiB
 DISK=60GiB
 VM_USER="$(id -un)"
 
@@ -91,7 +91,7 @@ incus launch images:ubuntu/24.04 "$NAME" --vm \
 
 # The script adds no devices itself, but a profile could. The root disk must
 # be the only disk the VM has.
-disk_count="$(incus config show "$NAME" --expanded | grep -c 'type: disk' || true)"
+disk_count="$(incus config show "$NAME" --expanded | grep -c '^ *type: disk$' || true)"
 if [[ "$disk_count" -ne 1 ]]; then
   incus stop "$NAME" --force
   die "$NAME has $disk_count disk devices, expected only the root disk. A profile is adding one. The VM is stopped; inspect it with: incus config show $NAME --expanded"
